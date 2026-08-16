@@ -27,12 +27,12 @@ def create_candidate(candidate: Candidate):
     return new_candidate
 
 
-@app.get("/candidates")
+@app.get("/candidates", status_code=status.HTTP_200_OK)
 def get_candidates():
     return candidates
 
 
-@app.get("/candidates/{candidate_id}")
+@app.get("/candidates/{candidate_id}", status_code=status.HTTP_200_OK)
 def get_candidate(candidate_id: int):
     for candidate in candidates:
         if candidate["id"] == candidate_id:
@@ -56,6 +56,18 @@ def update_candidate(candidate_id: int, candidate: Candidate):
             }
             candidates[index] = updated_candidate
             return updated_candidate
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Candidate not found",
+    )
+
+
+@app.delete("/candidates/{candidate_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_candidate(candidate_id: int):
+    for index, candidate in enumerate(candidates):
+        if candidate["id"] == candidate_id:
+            candidates.pop(index)
+            return
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Candidate not found",
