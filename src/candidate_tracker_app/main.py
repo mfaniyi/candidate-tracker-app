@@ -1,5 +1,5 @@
 from fastapi import FastAPI, status, HTTPException
-from .models import Candidate
+from .models import Candidate, CandidateCreate
 from .database import candidates
 
 app = FastAPI(
@@ -14,8 +14,12 @@ def home():
     return {"message": "Candidate Tracker API is running"}
 
 
-@app.post("/candidates", status_code=status.HTTP_201_CREATED)
-def create_candidate(candidate: Candidate):
+@app.post(
+    "/candidates",
+    response_model=Candidate,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_candidate(candidate: CandidateCreate):
     new_candidate = {
         "id": len(candidates) + 1,
         "name": candidate.name,
@@ -27,12 +31,12 @@ def create_candidate(candidate: Candidate):
     return new_candidate
 
 
-@app.get("/candidates", status_code=status.HTTP_200_OK)
+@app.get("/candidates", response_model=list[Candidate])
 def get_candidates():
     return candidates
 
 
-@app.get("/candidates/{candidate_id}", status_code=status.HTTP_200_OK)
+@app.get("/candidates/{candidate_id}", response_model=Candidate)
 def get_candidate(candidate_id: int):
     for candidate in candidates:
         if candidate["id"] == candidate_id:
@@ -43,8 +47,8 @@ def get_candidate(candidate_id: int):
     )
 
 
-@app.put("/candidates/{candidate_id}")
-def update_candidate(candidate_id: int, candidate: Candidate):
+@app.put("/candidates/{candidate_id}", response_model=Candidate)
+def update_candidate(candidate_id: int, candidate: CandidateCreate):
     for index, existing_candidate in enumerate(candidates):
         if existing_candidate["id"] == candidate_id:
             updated_candidate = {

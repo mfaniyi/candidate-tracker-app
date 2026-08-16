@@ -1,8 +1,14 @@
 from fastapi.testclient import TestClient
+import pytest
 from src.candidate_tracker_app.main import app
-
+from src.candidate_tracker_app.database import candidates
 
 client = TestClient(app)
+
+@pytest.fixture(autouse=True)
+def reset_candidates():
+    candidates.clear()
+    yield
 
 
 def test_create_candidate():
@@ -52,6 +58,15 @@ def test_get_candidates():
 
 
 def test_get_candidate():
+    client.post(
+        "/candidates",
+        json={
+            "name": "Michael",
+            "email": "michael@example.com",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
     response = client.get("/candidates/1")
     assert response.status_code == 200
     assert response.json()["id"] == 1
@@ -64,6 +79,15 @@ def test_candidate_not_found():
 
 
 def test_update_candidate():
+    client.post(
+        "/candidates",
+        json={
+            "name": "Michael",
+            "email": "michael@example.com",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
     response = client.put(
         "/candidates/1",
         json={
@@ -78,5 +102,14 @@ def test_update_candidate():
 
 
 def test_delete_candidate():
+    client.post(
+        "/candidates",
+        json={
+            "name": "Michael",
+            "email": "michael@example.com",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
     response = client.delete("/candidates/1")
     assert response.status_code == 204

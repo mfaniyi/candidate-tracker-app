@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr, Field
 
 
-class Candidate(BaseModel):
+class CandidateCreate(BaseModel):
     name: str
     email: EmailStr
     phone: str = Field(
@@ -10,3 +10,7 @@ class Candidate(BaseModel):
         pattern=r"^\+?[0-9]+$",
     )
     position: str
+
+
+class Candidate(CandidateCreate):
+    id: int
