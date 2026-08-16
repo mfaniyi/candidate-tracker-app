@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException
 from .models import Candidate
 from .database import candidates
 
@@ -30,3 +30,15 @@ def create_candidate(candidate: Candidate):
 @app.get("/candidates")
 def get_candidates():
     return candidates
+
+
+@app.get("/candidates/{candidate_id}")
+def get_candidate(candidate_id: int):
+    for candidate in candidates:
+        if candidate["id"] == candidate_id:
+            return candidate
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Candidate not found",
+    )
