@@ -1,8 +1,12 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 
 class Candidate(BaseModel):
     name: str
     email: EmailStr
-    phone: str
+    phone: str = Field(
+        min_length=10,
+        max_length=15,
+        pattern=r"^\+?[0-9]+$",
+    )
     position: str
