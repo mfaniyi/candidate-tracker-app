@@ -25,3 +25,8 @@ def create_candidate(candidate: Candidate):
     }
     candidates.append(new_candidate)
     return new_candidate
+
+
+@app.get("/candidates")
+def get_candidates():
+    return candidates
