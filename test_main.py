@@ -113,3 +113,23 @@ def test_delete_candidate():
     )
     response = client.delete("/candidates/1")
     assert response.status_code == 204
+
+
+def test_update_candidate_not_found():
+    response = client.put(
+        "/candidates/999",
+        json={
+            "name": "Michael",
+            "email": "michael@example.com",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Candidate not found"
+
+
+def test_delete_candidate_not_found():
+    response = client.delete("/candidates/999")
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Candidate not found"
