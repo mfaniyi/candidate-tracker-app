@@ -37,7 +37,25 @@ def get_candidate(candidate_id: int):
     for candidate in candidates:
         if candidate["id"] == candidate_id:
             return candidate
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Candidate not found",
+    )
 
+
+@app.put("/candidates/{candidate_id}")
+def update_candidate(candidate_id: int, candidate: Candidate):
+    for index, existing_candidate in enumerate(candidates):
+        if existing_candidate["id"] == candidate_id:
+            updated_candidate = {
+                "id": candidate_id,
+                "name": candidate.name,
+                "email": candidate.email,
+                "phone": candidate.phone,
+                "position": candidate.position,
+            }
+            candidates[index] = updated_candidate
+            return updated_candidate
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND,
         detail="Candidate not found",
