@@ -1,6 +1,6 @@
 from fastapi import FastAPI, status, HTTPException
 from .models import Candidate, CandidateCreate
-from .database import candidates
+from .database import candidates, next_candidate_id
 
 app = FastAPI(
     title="Candidate Tracker API",
@@ -20,14 +20,16 @@ def home():
     status_code=status.HTTP_201_CREATED,
 )
 def create_candidate(candidate: CandidateCreate):
+    global next_candidate_id
     new_candidate = {
-        "id": len(candidates) + 1,
+        "id": next_candidate_id,
         "name": candidate.name,
         "email": candidate.email,
         "phone": candidate.phone,
         "position": candidate.position,
     }
     candidates.append(new_candidate)
+    next_candidate_id += 1
     return new_candidate
 
 
