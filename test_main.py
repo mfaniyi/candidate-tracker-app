@@ -58,7 +58,7 @@ def test_get_candidates():
 
 
 def test_get_candidate():
-    client.post(
+    create_response = client.post(
         "/candidates",
         json={
             "name": "Michael",
@@ -67,9 +67,10 @@ def test_get_candidate():
             "position": "AI Engineer",
         },
     )
-    response = client.get("/candidates/1")
+    candidate_id = create_response.json()["id"]
+    response = client.get(f"/candidates/{candidate_id}")
     assert response.status_code == 200
-    assert response.json()["id"] == 1
+    assert response.json()["id"] == candidate_id
 
 
 def test_candidate_not_found():
@@ -79,7 +80,7 @@ def test_candidate_not_found():
 
 
 def test_update_candidate():
-    client.post(
+    create_response = client.post(
         "/candidates",
         json={
             "name": "Michael",
@@ -88,8 +89,9 @@ def test_update_candidate():
             "position": "AI Engineer",
         },
     )
+    candidate_id = create_response.json()["id"]
     response = client.put(
-        "/candidates/1",
+        f"/candidates/{candidate_id}",
         json={
             "name": "Michael Olawole",
             "email": "olawole@yahoo.com",
@@ -102,7 +104,7 @@ def test_update_candidate():
 
 
 def test_delete_candidate():
-    client.post(
+    create_response = client.post(
         "/candidates",
         json={
             "name": "Michael",
@@ -111,7 +113,8 @@ def test_delete_candidate():
             "position": "AI Engineer",
         },
     )
-    response = client.delete("/candidates/1")
+    candidate_id = create_response.json()["id"]
+    response = client.delete(f"/candidates/{candidate_id}")
     assert response.status_code == 204
 
 
@@ -133,3 +136,69 @@ def test_delete_candidate_not_found():
     response = client.delete("/candidates/999")
     assert response.status_code == 404
     assert response.json()["detail"] == "Candidate not found"
+
+
+def test_update_candidate_invalid_email():
+    create_response = client.post(
+        "/candidates",
+        json={
+            "name": "Michael",
+            "email": "michael@example.com",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
+    candidate_id = create_response.json()["id"]
+    response = client.put(
+        f"/candidates/{candidate_id}",
+        json={
+            "name": "Michael",
+            "email": "not-an-email",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
+    assert response.status_code == 422
+
+
+def test_get_candidate_after_deletion():
+    create_response = client.post(
+        "/candidates",
+        json={
+            "name": "Michael",
+            "email": "michael@example.com",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
+    candidate_id = create_response.json()["id"]
+    delete_response = client.delete(f"/candidates/{candidate_id}")
+    assert delete_response.status_code == 204
+    get_response = client.get(f"/candidates/{candidate_id}")
+    assert get_response.status_code == 404
+
+
+def test_candidate_id_is_monotonic():
+    first_response = client.post(
+        "/candidates",
+        json={
+            "name": "First Candidate",
+            "email": "first@example.com",
+            "phone": "08012345678",
+            "position": "AI Engineer",
+        },
+    )
+    first_id = first_response.json()["id"]
+    delete_response = client.delete(f"/candidates/{first_id}")
+    assert delete_response.status_code == 204
+    second_response = client.post(
+        "/candidates",
+        json={
+            "name": "Second Candidate",
+            "email": "second@example.com",
+            "phone": "08087654321",
+            "position": "ML Engineer",
+        },
+    )
+    second_id = second_response.json()["id"]
+    assert second_id > first_id
